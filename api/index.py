@@ -5,20 +5,11 @@ from urllib.parse import parse_qs
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Mock Flask request for serverless
-class MockRequest:
-    def __init__(self, method, path, headers, body):
-        self.method = method
-        self.path = path
-        self.headers = headers
-        self.body = body
-        self.environ = {
-            'REQUEST_METHOD': method,
-            'PATH_INFO': path,
-            'CONTENT_TYPE': headers.get('content-type', ''),
-            'CONTENT_LENGTH': str(len(body)) if body else '0',
-            'wsgi.input': body.encode() if isinstance(body, str) else body
-        }
+# Import Flask app at module level
+from osint_web_app import app
+
+# Vercel serverless handler
+app_handler = app
 
 def handler(request):
     """Vercel serverless handler"""
@@ -28,9 +19,6 @@ def handler(request):
         path = request.get('path', '/')
         headers = request.get('headers', {})
         body = request.get('body', '')
-        
-        # Import Flask app
-        from osint_web_app import app
         
         # Use Flask's test client for serverless
         with app.test_client() as client:
@@ -55,5 +43,4 @@ def handler(request):
 
 # For local development
 if __name__ == "__main__":
-    from osint_web_app import app
     app.run(host='0.0.0.0', port=5000, debug=True)
