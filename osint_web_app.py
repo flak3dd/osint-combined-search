@@ -28,6 +28,13 @@ def add_cache_headers(response):
 # Global searcher instance with caching
 searcher = OSINTCombinedSearch()
 
+# API key storage (in-memory for demo, in production use secure storage)
+api_keys_storage = {
+    "osint_industries": os.getenv("OSINT_INDUSTRIES_API_KEY"),
+    "dehashed": os.getenv("DEHASHED_API_KEY"),
+    "cypher_dynamics": os.getenv("CYPHER_DYNAMICS_API_KEY")
+}
+
 # Simple in-memory cache for search results
 search_cache = {}
 CACHE_TTL = 3600  # 1 hour cache
@@ -843,6 +850,45 @@ def api_cache_stats():
         "size": len(search_cache),
         "max_size": 100,
         "ttl_seconds": CACHE_TTL
+    })
+
+
+@app.route("/api/keys", methods=["GET"])
+def api_get_keys():
+    """Get current API keys (masked)"""
+    return jsonify({
+        "osint_industries": bool(api_keys_storage.get("osint_industries")),
+        "dehashed": bool(api_keys_storage.get("dehashed")),
+        "cypher_dynamics": bool(api_keys_storage.get("cypher_dynamics"))
+    })
+
+
+@app.route("/api/keys", methods=["POST"])
+def api_set_keys():
+    """Set API keys"""
+    data = request.get_json(force=True) or {}
+    
+    if "osint_industries" in data:
+        api_keys_storage["osint_industries"] = data["osint_industries"]
+    if "dehashed" in data:
+        api_keys_storage["dehashed"] = data["dehashed"]
+    if "cypher_dynamics" in data:
+        api_keys_storage["cypher_dynamics"] = data["cypher_dynamics"]
+    
+    # Update searcher with new keys
+    searcher.api_keys = {
+        "osint_industries": api_keys_storage.get("osint_industries"),
+        "dehashed": api_keys_storage.get("dehashed"),
+        "cypher_dynamics": api_keys_storage.get("cypher_dynamics")
+    }
+    
+    return jsonify({
+        "status": "success",
+        "keys": {
+            "osint_industries": bool(api_keys_storage.get("osint_industries")),
+            "dehashed": bool(api_keys_storage.get("dehashed")),
+            "cypher_dynamics": bool(api_keys_storage.get("cypher_dynamics"))
+        }
     })
 
 
