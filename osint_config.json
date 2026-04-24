@@ -1,0 +1,9 @@
+{
+  "osint_industries_api_key": "YOUR_OSINT_INDUSTRIES_KEY_HERE",
+  "dehashed_api_key": "YOUR_DEHASHED_KEY_HERE",
+  "dehashed_email": "your@email.com",
+  "cypher_dynamics_api_key": "YOUR_CYPHER_DYNAMICS_KEY_HERE",
+  "cypher_dynamics_api_url": "https://api.cypherdynamics.com/search",
+  "timeout": 30,
+  "premium": true
+}
